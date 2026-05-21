@@ -1,0 +1,939 @@
+bash
+
+cat > /mnt/user-data/outputs/intec_metalurgica_yz.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTEC Solutions | Diagnóstico Metalúrgica YZ</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --surface: #0d1117;
+  --surface2: #131924;
+  --border: rgba(255,255,255,0.07);
+  --border-bright: rgba(255,255,255,0.15);
+  --blue: #1e6bff;
+  --blue-light: #4d8fff;
+  --red: #ff3b3b;
+  --orange: #ff8c00;
+  --green: #00e676;
+  --purple: #9b59f7;
+  --yellow: #ffd600;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --text-dim: #2a3a52;
+  --font-head: 'Rajdhani', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-body: 'Barlow', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  gap: 16px;
+}
+.logo-area { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--blue);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-icon::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.25),transparent); }
+.logo-icon svg { width:20px; height:20px; fill:#fff; position:relative; z-index:1; }
+.logo-text .name { font-family:var(--font-head); font-size:1.3rem; font-weight:700; letter-spacing:2px; color:#fff; line-height:1; }
+.logo-text .sub { font-family:var(--font-mono); font-size:0.58rem; color:var(--blue-light); letter-spacing:2px; }
+
+.header-center {
+  display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;
+}
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 11px; border-radius: 20px;
+  border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-muted);
+  white-space: nowrap;
+}
+.dot { width:6px; height:6px; border-radius:50%; animation: pdot 2s infinite; }
+.dot-red { background:var(--red); box-shadow:0 0 6px var(--red); }
+.dot-blue { background:var(--blue); box-shadow:0 0 6px var(--blue); }
+.dot-green { background:var(--green); box-shadow:0 0 6px var(--green); }
+@keyframes pdot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.client-tag { text-align:right; flex-shrink:0; }
+.client-tag .cname { font-family:var(--font-head); font-size:0.95rem; font-weight:700; color:#fff; }
+.client-tag .csub { font-family:var(--font-mono); font-size:0.58rem; color:var(--text-muted); }
+
+/* KPI BAR */
+.kpi-bar {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.kpi-item {
+  flex: 1; padding: 8px 16px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+  cursor: default;
+  transition: background 0.2s;
+}
+.kpi-item:last-child { border-right: none; }
+.kpi-item:hover { background: rgba(255,255,255,0.02); }
+.kpi-label {
+  font-family: var(--font-mono); font-size: 0.55rem;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 2px;
+}
+.kpi-val {
+  font-family: var(--font-head); font-size: 1.1rem; font-weight: 700;
+  line-height: 1;
+}
+.kpi-sub { font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-muted); margin-top: 1px; }
+.kpi-bar-fill {
+  position: absolute; bottom: 0; left: 0;
+  height: 2px; background: currentColor; opacity: 0.4;
+  transition: width 1.5s cubic-bezier(.16,1,.3,1);
+}
+
+/* MAIN */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 370px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* PLANT */
+.plant-panel {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 60% at 45% 50%, rgba(30,107,255,0.04) 0%, transparent 65%),
+    var(--bg);
+}
+.plant-panel::before {
+  content:''; position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(30,107,255,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,107,255,0.055) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.plant-panel::after {
+  content:''; position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(30,107,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,107,255,0.025) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+.plant-label {
+  position:absolute; top:12px; left:16px; z-index:30;
+  font-family:var(--font-mono); font-size:0.6rem;
+  color:rgba(30,107,255,0.5); letter-spacing:2px; text-transform:uppercase;
+}
+.compass-wrap {
+  position:absolute; bottom:14px; left:14px; z-index:30;
+  display:flex; align-items:center; gap:8px;
+}
+.compass {
+  width:38px; height:38px;
+  border:1px solid var(--border-bright); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--surface);
+  font-family:var(--font-mono); font-size:0.6rem; color:var(--text-muted);
+}
+.scale-wrap { display:flex; flex-direction:column; gap:2px; }
+.scale-line { width:72px; height:3px; background:linear-gradient(90deg,var(--blue) 50%,transparent 50%); background-size:18px 100%; border:1px solid rgba(30,107,255,0.4); }
+.scale-text { font-family:var(--font-mono); font-size:0.52rem; color:var(--text-muted); }
+
+/* FACTORY SVG */
+.factory-svg { position:absolute; inset:0; width:100%; height:100%; z-index:10; }
+
+/* Zone hover/active */
+.zone-group { cursor:pointer; }
+.zone-bg { transition: fill 0.25s, stroke 0.25s, filter 0.25s; }
+.zone-group:hover .zone-bg { filter: brightness(1.5); }
+.zone-label { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:13px; fill:rgba(255,255,255,0.92); pointer-events:none; }
+.zone-sub { font-family:'IBM Plex Mono',monospace; font-size:8.5px; fill:rgba(255,255,255,0.38); pointer-events:none; }
+.badge-rect { rx:3; ry:3; }
+.badge-text { font-family:'IBM Plex Mono',monospace; font-size:7.5px; fill:#fff; pointer-events:none; }
+
+.pulse { fill:none; stroke-width:1.5; animation:svgpulse 2.2s ease-out infinite; }
+@keyframes svgpulse { 0%{r:8;stroke-opacity:.9} 100%{r:22;stroke-opacity:0} }
+
+.cam-fov { fill-opacity:0; transition:fill-opacity .3s; }
+.cam-body { stroke-width:1.5; transition:fill .25s; }
+.cam-group:hover .cam-fov, .cam-group.active .cam-fov { fill-opacity:.09; }
+.cam-group:hover .cam-body, .cam-group.active .cam-body { fill:var(--purple); }
+
+/* Active zone colors */
+.zone-group.sel-red .zone-bg { fill:rgba(255,59,59,0.18)!important; stroke:var(--red)!important; filter:drop-shadow(0 0 8px rgba(255,59,59,0.4))!important; }
+.zone-group.sel-orange .zone-bg { fill:rgba(255,140,0,0.18)!important; stroke:var(--orange)!important; filter:drop-shadow(0 0 8px rgba(255,140,0,0.4))!important; }
+.zone-group.sel-green .zone-bg { fill:rgba(0,230,118,0.18)!important; stroke:var(--green)!important; filter:drop-shadow(0 0 8px rgba(0,230,118,0.4))!important; }
+.zone-group.sel-blue .zone-bg { fill:rgba(30,107,255,0.18)!important; stroke:var(--blue-light)!important; filter:drop-shadow(0 0 8px rgba(30,107,255,0.4))!important; }
+.zone-group.sel-purple .zone-bg { fill:rgba(155,89,247,0.18)!important; stroke:var(--purple)!important; filter:drop-shadow(0 0 8px rgba(155,89,247,0.4))!important; }
+.cam-group.active .cam-body { fill:var(--purple)!important; }
+
+/* DETAIL PANEL */
+.detail-panel {
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden; min-height:0;
+}
+
+/* Idle */
+.idle-screen {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  height:100%; gap:16px; padding:32px; text-align:center;
+}
+.idle-hexagon {
+  width:60px; height:60px;
+  border:1px solid var(--border-bright);
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  opacity:.35;
+  transform:rotate(45deg);
+}
+.idle-hexagon svg { width:26px; height:26px; fill:var(--text-muted); transform:rotate(-45deg); }
+.idle-title { font-family:var(--font-head); font-size:1rem; font-weight:600; color:var(--text-muted); }
+.idle-sub { font-family:var(--font-body); font-size:0.78rem; color:#2a3a52; line-height:1.6; max-width:240px; }
+.idle-hint {
+  display:flex; align-items:center; gap:8px; margin-top:8px;
+  padding:8px 14px; border:1px dashed rgba(30,107,255,0.25);
+  border-radius:6px;
+}
+.idle-hint span { font-family:var(--font-mono); font-size:0.62rem; color:rgba(30,107,255,0.5); }
+
+/* Active */
+.active-panel { display:none; flex-direction:column; height:100%; overflow:hidden; }
+.active-panel.show { display:flex; animation:panelIn .28s ease; }
+@keyframes panelIn { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:translateX(0)} }
+
+.panel-top {
+  padding:16px 20px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.p-cat {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border-radius:4px;
+  font-family:var(--font-mono); font-size:0.6rem; font-weight:500;
+  text-transform:uppercase; letter-spacing:1px;
+  margin-bottom:8px;
+}
+.p-title { font-family:var(--font-head); font-size:1.25rem; font-weight:700; color:#fff; line-height:1.2; margin-bottom:4px; }
+.p-meta { font-family:var(--font-mono); font-size:0.58rem; color:var(--text-muted); }
+
+/* Problem block */
+.prob-block {
+  margin:14px 20px 0;
+  padding:11px 13px;
+  border-radius:6px; border-left:3px solid;
+  flex-shrink:0;
+}
+.prob-title {
+  font-family:var(--font-head); font-size:0.8rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px;
+  margin-bottom:3px;
+}
+.prob-desc { font-size:0.78rem; line-height:1.5; color:var(--text-muted); }
+
+/* Scroll */
+.panel-scroll {
+  flex:1; overflow-y:auto; padding:0 20px 12px;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+  min-height:0;
+}
+.panel-scroll::-webkit-scrollbar { width:3px; }
+.panel-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+.sec-head {
+  font-family:var(--font-mono); font-size:0.58rem; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:2px;
+  padding:12px 0 8px;
+  display:flex; align-items:center; gap:8px;
+}
+.sec-head::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.sol-item { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+.sol-item:last-child { border-bottom:none; }
+.sol-num {
+  width:20px; height:20px; border-radius:4px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono); font-size:0.58rem; font-weight:500; margin-top:2px;
+}
+.sol-title { font-family:var(--font-body); font-size:0.84rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+.sol-desc { font-size:0.75rem; color:var(--text-muted); line-height:1.5; }
+
+/* Metrics */
+.panel-metrics {
+  padding:12px 20px;
+  border-top:1px solid var(--border);
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; flex-shrink:0;
+  background:var(--bg);
+}
+.m-box { padding:9px 11px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; }
+.m-label { font-family:var(--font-mono); font-size:0.56rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; }
+.m-val { font-family:var(--font-head); font-size:1.05rem; font-weight:700; }
+
+/* TOOLTIP */
+.tooltip {
+  position:fixed; pointer-events:none; z-index:500;
+  background:var(--surface); border:1px solid var(--border-bright);
+  border-radius:5px; padding:6px 11px;
+  font-family:var(--font-mono); font-size:0.65rem; color:var(--text);
+  opacity:0; transition:opacity .12s; white-space:nowrap;
+}
+
+/* SUMMARY OVERLAY */
+.summary-overlay {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(7,9,15,0.92);
+  align-items:center; justify-content:center;
+  animation:fadeIn .3s ease;
+}
+.summary-overlay.open { display:flex; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.summary-box {
+  background:var(--surface); border:1px solid var(--border-bright);
+  border-radius:12px; padding:32px 36px; max-width:780px; width:90%;
+  max-height:85vh; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+.sum-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
+.sum-title { font-family:var(--font-head); font-size:1.5rem; font-weight:700; color:#fff; }
+.sum-sub { font-family:var(--font-mono); font-size:0.62rem; color:var(--text-muted); margin-top:3px; }
+.sum-close {
+  background:none; border:1px solid var(--border); color:var(--text-muted);
+  padding:6px 14px; border-radius:6px; cursor:pointer;
+  font-family:var(--font-mono); font-size:0.65rem;
+  transition:all .2s;
+}
+.sum-close:hover { border-color:var(--border-bright); color:var(--text); }
+.sum-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+.sum-card { padding:14px 16px; border-radius:8px; border-left:3px solid; }
+.sum-card-num { font-family:var(--font-mono); font-size:0.58rem; color:var(--text-muted); margin-bottom:4px; }
+.sum-card-title { font-family:var(--font-head); font-size:0.95rem; font-weight:700; color:#fff; margin-bottom:6px; }
+.sum-card-sols { font-size:0.76rem; color:var(--text-muted); line-height:1.6; }
+.sum-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding-top:20px; border-top:1px solid var(--border); }
+.sum-kpi { text-align:center; }
+.sum-kpi-val { font-family:var(--font-head); font-size:1.4rem; font-weight:700; }
+.sum-kpi-lbl { font-family:var(--font-mono); font-size:0.58rem; color:var(--text-muted); margin-top:2px; line-height:1.4; }
+
+/* Summary button */
+.sum-btn {
+  position:absolute; bottom:16px; right:20px; z-index:30;
+  background:var(--blue); color:#fff; border:none; cursor:pointer;
+  padding:9px 18px; border-radius:7px;
+  font-family:var(--font-head); font-size:0.85rem; font-weight:600; letter-spacing:1px;
+  transition:all .2s; box-shadow:0 4px 16px rgba(30,107,255,0.35);
+  display:flex; align-items:center; gap:8px;
+}
+.sum-btn:hover { background:#2a7aff; transform:translateY(-1px); box-shadow:0 6px 20px rgba(30,107,255,0.45); }
+.sum-btn svg { width:15px; height:15px; fill:#fff; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+    </div>
+    <div class="logo-text">
+      <div class="name">INTEC</div>
+      <div class="sub">Solutions Consultoria</div>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <div class="status-pill"><div class="dot dot-red"></div>6 Não Conformidades</div>
+    <div class="status-pill"><div class="dot dot-blue"></div>IA Monitorando</div>
+    <div class="status-pill"><div class="dot dot-green"></div>Diagnóstico Ativo</div>
+  </div>
+
+  <div class="client-tag">
+    <div class="cname">Metalúrgica YZ — Jaraguá do Sul / SC</div>
+    <div class="csub">Proposta Técnica · 3 meses · Rev.01 · R$ 195.000</div>
+  </div>
+</header>
+
+<!-- KPI BAR -->
+<div class="kpi-bar">
+  <div class="kpi-item">
+    <div class="kpi-label">Meta: Acidentes</div>
+    <div class="kpi-val" style="color:var(--red)">-50%</div>
+    <div class="kpi-sub">em 6 meses · NR-12</div>
+    <div class="kpi-bar-fill" style="color:var(--red);width:0%" id="kf1"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">Meta: Energia/Água</div>
+    <div class="kpi-val" style="color:var(--blue-light)">-10%</div>
+    <div class="kpi-sub">consumo por setor · IoT</div>
+    <div class="kpi-bar-fill" style="color:var(--blue-light);width:0%" id="kf2"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">Rastreabilidade</div>
+    <div class="kpi-val" style="color:var(--green)">100%</div>
+    <div class="kpi-sub">resíduos · PNRS</div>
+    <div class="kpi-bar-fill" style="color:var(--green);width:0%" id="kf3"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">Conformidade NRs</div>
+    <div class="kpi-val" style="color:var(--yellow)">NR 1,6,12,17,23</div>
+    <div class="kpi-sub">total · legislação ambiental</div>
+    <div class="kpi-bar-fill" style="color:var(--yellow);width:0%" id="kf4"></div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-label">Orçamento Total</div>
+    <div class="kpi-val" style="color:var(--purple)">R$ 195k</div>
+    <div class="kpi-sub">3 sprints Kanban · 90 dias</div>
+    <div class="kpi-bar-fill" style="color:var(--purple);width:0%" id="kf5"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PLANT -->
+  <div class="plant-panel">
+    <div class="plant-label">PLANTA BAIXA // METALÚRGICA YZ // JARAGUÁ DO SUL-SC // NÍVEL 01</div>
+
+    <svg class="factory-svg" viewBox="0 0 820 530" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-green" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="rgba(0,230,118,0.7)"/>
+        </marker>
+      </defs>
+
+      <!-- Outer wall -->
+      <rect x="28" y="28" width="764" height="474" rx="4" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="2"/>
+      <!-- Interior dividers -->
+      <line x1="28" y1="280" x2="792" y2="280" stroke="rgba(255,255,255,0.07)" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <line x1="415" y1="28" x2="415" y2="502" stroke="rgba(255,255,255,0.07)" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Corridors -->
+      <rect x="28" y="268" width="764" height="24" fill="rgba(234,179,8,0.05)" stroke="none"/>
+      <line x1="28" y1="268" x2="792" y2="268" stroke="rgba(234,179,8,0.22)" stroke-width="1" stroke-dasharray="5 4"/>
+      <line x1="28" y1="292" x2="792" y2="292" stroke="rgba(234,179,8,0.22)" stroke-width="1" stroke-dasharray="5 4"/>
+      <text x="44" y="283" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(234,179,8,0.4)" letter-spacing="2">CORREDOR PRINCIPAL</text>
+
+      <rect x="403" y="28" width="24" height="474" fill="rgba(234,179,8,0.04)" stroke="none"/>
+      <line x1="403" y1="28" x2="403" y2="502" stroke="rgba(234,179,8,0.18)" stroke-width="1" stroke-dasharray="5 4"/>
+      <line x1="427" y1="28" x2="427" y2="502" stroke="rgba(234,179,8,0.18)" stroke-width="1" stroke-dasharray="5 4"/>
+
+      <!-- Doors -->
+      <rect x="28" y="272" width="10" height="18" rx="2" fill="rgba(255,255,255,0.25)"/>
+      <rect x="782" y="272" width="10" height="18" rx="2" fill="rgba(255,255,255,0.25)"/>
+      <rect x="406" y="492" width="18" height="10" rx="2" fill="rgba(255,255,255,0.25)"/>
+
+      <!-- ======== ZONE 1: SEGURANÇA / ACIDENTES (top-left) ======== -->
+      <g class="zone-group" id="z1" onclick="pick('z1','acidentes','sel-red')" data-tip="Seg. e Acidentes · NR-12">
+        <circle cx="220" cy="148" r="8" stroke="var(--red)" class="pulse" style="animation-delay:0s"/>
+        <rect class="zone-bg" x="42" y="42" width="352" height="212" rx="6"
+          fill="rgba(255,59,59,0.07)" stroke="rgba(255,59,59,0.45)" stroke-width="1.5"/>
+        <!-- Lathe 1 -->
+        <rect x="65" y="72" width="54" height="32" rx="3" fill="rgba(255,59,59,0.15)" stroke="rgba(255,59,59,0.45)" stroke-width="1"/>
+        <rect x="70" y="76" width="12" height="9" rx="1" fill="rgba(255,59,59,0.5)"/>
+        <circle cx="106" cy="82" r="7" fill="none" stroke="rgba(255,59,59,0.4)" stroke-width="1.5"/>
+        <circle cx="106" cy="82" r="3" fill="rgba(255,59,59,0.3)"/>
+        <text x="67" y="116" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,100,100,0.55)">TORNO-01</text>
+        <!-- Lathe 2 -->
+        <rect x="140" y="72" width="54" height="32" rx="3" fill="rgba(255,59,59,0.15)" stroke="rgba(255,59,59,0.45)" stroke-width="1"/>
+        <rect x="145" y="76" width="12" height="9" rx="1" fill="rgba(255,59,59,0.5)"/>
+        <circle cx="181" cy="82" r="7" fill="none" stroke="rgba(255,59,59,0.4)" stroke-width="1.5"/>
+        <circle cx="181" cy="82" r="3" fill="rgba(255,59,59,0.3)"/>
+        <text x="142" y="116" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,100,100,0.55)">TORNO-02</text>
+        <!-- CNC -->
+        <rect x="215" y="72" width="54" height="32" rx="3" fill="rgba(255,59,59,0.12)" stroke="rgba(255,59,59,0.35)" stroke-width="1"/>
+        <rect x="222" y="77" width="30" height="18" rx="1" fill="rgba(255,59,59,0.08)"/>
+        <line x1="222" y1="81" x2="252" y2="81" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+        <line x1="222" y1="85" x2="248" y2="85" stroke="rgba(255,59,59,0.3)" stroke-width="1"/>
+        <text x="217" y="116" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,100,100,0.55)">CNC-01</text>
+        <!-- CIPA circle -->
+        <circle cx="330" cy="155" r="22" fill="rgba(255,59,59,0.08)" stroke="rgba(255,59,59,0.35)" stroke-width="1.5"/>
+        <text x="318" y="150" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,100,100,0.8)">CIPA</text>
+        <text x="316" y="162" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(255,100,100,0.45)">ATIVO</text>
+        <!-- badge -->
+        <rect class="badge-rect" x="42" y="32" width="84" height="16" rx="3" fill="var(--red)"/>
+        <text class="badge-text" x="50" y="43">NR-12 · CRÍTICO</text>
+        <text class="zone-label" x="58" y="188">Segurança e Acidentes</text>
+        <text class="zone-sub" x="58" y="202">CIPA · NR-12/6 · Tornos · CNC · Serra</text>
+        <text class="zone-sub" x="58" y="215">Visão Computacional · EPIs</text>
+      </g>
+
+      <!-- ======== ZONE 2: MÁQUINAS OBSOLETAS (bottom-left) ======== -->
+      <g class="zone-group" id="z2" onclick="pick('z2','maquinas','sel-orange')" data-tip="Máquinas Obsoletas · MES">
+        <circle cx="220" cy="395" r="8" stroke="var(--orange)" class="pulse" style="animation-delay:.6s"/>
+        <rect class="zone-bg" x="42" y="304" width="352" height="184" rx="6"
+          fill="rgba(255,140,0,0.07)" stroke="rgba(255,140,0,0.4)" stroke-width="1.5"/>
+        <!-- Press 1 -->
+        <rect x="65" y="326" width="42" height="54" rx="3" fill="rgba(255,140,0,0.13)" stroke="rgba(255,140,0,0.45)" stroke-width="1"/>
+        <rect x="73" y="332" width="26" height="11" rx="1" fill="rgba(255,140,0,0.4)"/>
+        <rect x="78" y="350" width="16" height="18" rx="1" fill="rgba(255,140,0,0.25)"/>
+        <text x="62" y="392" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.55)">PRENSA-01</text>
+        <!-- Press 2 -->
+        <rect x="125" y="326" width="42" height="54" rx="3" fill="rgba(255,140,0,0.13)" stroke="rgba(255,140,0,0.45)" stroke-width="1"/>
+        <rect x="133" y="332" width="26" height="11" rx="1" fill="rgba(255,140,0,0.4)"/>
+        <rect x="138" y="350" width="16" height="18" rx="1" fill="rgba(255,140,0,0.25)"/>
+        <text x="122" y="392" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.55)">PRENSA-02</text>
+        <!-- MES tablet -->
+        <rect x="220" y="330" width="50" height="38" rx="3" fill="rgba(255,140,0,0.1)" stroke="rgba(255,140,0,0.35)" stroke-width="1"/>
+        <rect x="226" y="335" width="38" height="24" rx="1" fill="rgba(255,140,0,0.06)"/>
+        <line x1="226" y1="340" x2="264" y2="340" stroke="rgba(255,140,0,0.3)" stroke-width="1"/>
+        <line x1="226" y1="345" x2="258" y2="345" stroke="rgba(255,140,0,0.3)" stroke-width="1"/>
+        <line x1="226" y1="350" x2="252" y2="350" stroke="rgba(255,140,0,0.2)" stroke-width="1"/>
+        <text x="222" y="382" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.55)">SISTEMA MES</text>
+        <!-- Sensor icon -->
+        <circle cx="340" cy="350" r="14" fill="rgba(255,140,0,0.08)" stroke="rgba(255,140,0,0.35)" stroke-width="1.5"/>
+        <circle cx="340" cy="350" r="5" fill="none" stroke="rgba(255,140,0,0.6)" stroke-width="1.5"/>
+        <line x1="340" y1="336" x2="340" y2="340" stroke="rgba(255,140,0,0.4)" stroke-width="1.5"/>
+        <text x="327" y="376" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.5)">SENSOR IoT</text>
+        <!-- badge -->
+        <rect class="badge-rect" x="42" y="294" width="96" height="16" rx="3" fill="var(--orange)"/>
+        <text class="badge-text" x="50" y="305">NR-12 · OBSOLETO</text>
+        <text class="zone-label" x="58" y="454">Máquinas Obsoletas</text>
+        <text class="zone-sub" x="58" y="468">Prensas · MES · Sensores IoT · Exaustão</text>
+      </g>
+
+      <!-- ======== ZONE 3: INCÊNDIO / NR-23 (top-right) ======== -->
+      <g class="zone-group" id="z3" onclick="pick('z3','incendio','sel-orange')" data-tip="Incêndio · NR-23 · Fornos">
+        <circle cx="610" cy="148" r="8" stroke="var(--orange)" class="pulse" style="animation-delay:1.1s"/>
+        <rect class="zone-bg" x="436" y="42" width="340" height="212" rx="6"
+          fill="rgba(255,140,0,0.07)" stroke="rgba(255,140,0,0.4)" stroke-width="1.5"/>
+        <!-- Furnace 1 -->
+        <rect x="458" y="68" width="58" height="72" rx="4" fill="rgba(255,140,0,0.14)" stroke="rgba(255,140,0,0.55)" stroke-width="1.5"/>
+        <ellipse cx="487" cy="82" rx="17" ry="9" fill="rgba(255,80,0,0.3)"/>
+        <rect x="467" y="95" width="40" height="30" rx="2" fill="rgba(255,80,0,0.1)"/>
+        <text x="460" y="153" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.55)">FORNO-01</text>
+        <!-- Furnace 2 -->
+        <rect x="534" y="68" width="58" height="72" rx="4" fill="rgba(255,140,0,0.14)" stroke="rgba(255,140,0,0.55)" stroke-width="1.5"/>
+        <ellipse cx="563" cy="82" rx="17" ry="9" fill="rgba(255,80,0,0.3)"/>
+        <rect x="543" y="95" width="40" height="30" rx="2" fill="rgba(255,80,0,0.1)"/>
+        <text x="536" y="153" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(255,160,0,0.55)">FORNO-02</text>
+        <!-- Extinguisher -->
+        <rect x="678" y="70" width="14" height="30" rx="7" fill="rgba(255,59,59,0.35)" stroke="rgba(255,59,59,0.6)" stroke-width="1.5"/>
+        <line x1="685" y1="70" x2="695" y2="65" stroke="rgba(255,59,59,0.5)" stroke-width="1.5"/>
+        <text x="668" y="112" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(255,100,100,0.6)">EXTINTOR</text>
+        <!-- Escape route arrow -->
+        <path d="M630 185 L730 185 L730 260" fill="none" stroke="rgba(0,230,118,0.45)" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>
+        <text x="636" y="180" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(0,230,118,0.5)">ROTA DE FUGA</text>
+        <!-- Temp sensor -->
+        <circle cx="640" cy="120" r="11" fill="rgba(255,140,0,0.08)" stroke="rgba(255,140,0,0.4)" stroke-width="1.5"/>
+        <text x="634" y="124" font-family="IBM Plex Mono,monospace" font-size="8" fill="rgba(255,160,0,0.7)">T°</text>
+        <text x="628" y="143" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(255,160,0,0.45)">SENSOR</text>
+        <!-- badge -->
+        <rect class="badge-rect" x="436" y="32" width="70" height="16" rx="3" fill="var(--orange)"/>
+        <text class="badge-text" x="444" y="43">NR-23 · FOGO</text>
+        <text class="zone-label" x="452" y="208">Fornos e NR-23</text>
+        <text class="zone-sub" x="452" y="222">Tratamento Térmico · Sensores · Brigada</text>
+        <text class="zone-sub" x="452" y="235">Rotas de Fuga · Bombeiros Voluntários</text>
+      </g>
+
+      <!-- ======== ZONE 4: SUSTENTABILIDADE (bottom-right) ======== -->
+      <g class="zone-group" id="z4" onclick="pick('z4','sustentabilidade','sel-green')" data-tip="Sustentabilidade · PNRS · IoT">
+        <rect class="zone-bg" x="436" y="304" width="340" height="184" rx="6"
+          fill="rgba(0,230,118,0.05)" stroke="rgba(0,230,118,0.35)" stroke-width="1.5"/>
+        <!-- IoT water meter -->
+        <rect x="458" y="328" width="38" height="40" rx="4" fill="rgba(0,230,118,0.09)" stroke="rgba(0,230,118,0.4)" stroke-width="1"/>
+        <text x="464" y="343" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(0,230,118,0.7)">IoT</text>
+        <text x="461" y="354" font-family="IBM Plex Mono,monospace" font-size="6" fill="rgba(0,230,118,0.5)">ÁGUA</text>
+        <text x="459" y="378" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(0,230,118,0.45)">MEDIDOR</text>
+        <!-- IoT energy meter -->
+        <rect x="514" y="328" width="38" height="40" rx="4" fill="rgba(0,230,118,0.09)" stroke="rgba(0,230,118,0.4)" stroke-width="1"/>
+        <text x="520" y="343" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(0,230,118,0.7)">IoT</text>
+        <text x="517" y="354" font-family="IBM Plex Mono,monospace" font-size="6" fill="rgba(0,230,118,0.5)">ENRG</text>
+        <text x="515" y="378" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(0,230,118,0.45)">MEDIDOR</text>
+        <!-- QR waste station -->
+        <rect x="580" y="324" width="44" height="44" rx="3" fill="rgba(0,230,118,0.07)" stroke="rgba(0,230,118,0.45)" stroke-width="1"/>
+        <rect x="586" y="330" width="12" height="12" rx="1" fill="none" stroke="rgba(0,230,118,0.6)" stroke-width="1"/>
+        <rect x="588" y="332" width="4" height="4" fill="rgba(0,230,118,0.8)"/>
+        <rect x="602" y="330" width="12" height="12" rx="1" fill="none" stroke="rgba(0,230,118,0.6)" stroke-width="1"/>
+        <rect x="604" y="332" width="4" height="4" fill="rgba(0,230,118,0.8)"/>
+        <rect x="586" y="346" width="12" height="12" rx="1" fill="none" stroke="rgba(0,230,118,0.6)" stroke-width="1"/>
+        <rect x="588" y="348" width="4" height="4" fill="rgba(0,230,118,0.8)"/>
+        <text x="580" y="380" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(0,230,118,0.5)">QR RESÍDUO</text>
+        <!-- waste drum warning -->
+        <rect x="660" y="330" width="24" height="32" rx="3" fill="rgba(255,59,59,0.1)" stroke="rgba(255,59,59,0.35)" stroke-width="1"/>
+        <text x="663" y="348" font-family="IBM Plex Mono,monospace" font-size="9" fill="rgba(255,100,100,0.6)">!</text>
+        <text x="658" y="372" font-family="IBM Plex Mono,monospace" font-size="6" fill="rgba(255,100,100,0.45)">RESÍDUO</text>
+        <text x="659" y="381" font-family="IBM Plex Mono,monospace" font-size="6" fill="rgba(255,100,100,0.45)">CLASSE I</text>
+        <!-- badge -->
+        <rect class="badge-rect" x="436" y="294" width="80" height="16" rx="3" fill="rgba(0,230,118,0.75)"/>
+        <text class="badge-text" x="444" y="305" fill="#003322">PNRS · NBR 10004</text>
+        <text class="zone-label" x="452" y="430">Gestão Ambiental</text>
+        <text class="zone-sub" x="452" y="444">Smart Metering · QR Code · PNRS</text>
+        <text class="zone-sub" x="452" y="457">Resíduos Classe I · NBR 10.004</text>
+      </g>
+
+      <!-- ======== ZONE 5: CULTURA (DDS strip — center horizontal) ======== -->
+      <g class="zone-group" id="z5" onclick="pick('z5','cultura','sel-blue')" data-tip="Cultura Interna · DDS · CIPA">
+        <rect class="zone-bg" x="120" y="269" width="185" height="22" rx="11"
+          fill="rgba(30,107,255,0.13)" stroke="rgba(30,107,255,0.55)" stroke-width="1.5"/>
+        <circle cx="142" cy="280" r="5" fill="rgba(30,107,255,0.3)" stroke="rgba(30,107,255,0.7)" stroke-width="1"/>
+        <text x="152" y="284" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(100,160,255,0.85)">PONTO DDS · CIPA · TV GESTÃO</text>
+      </g>
+
+      <!-- ======== ZONE 6: TECNOLOGIA (IoT strip — center right) ======== -->
+      <g class="zone-group" id="z6" onclick="pick('z6','tecnologia','sel-purple')" data-tip="Indústria 4.0 · Dashboard · Retrofit">
+        <rect class="zone-bg" x="440" y="269" width="195" height="22" rx="11"
+          fill="rgba(155,89,247,0.13)" stroke="rgba(155,89,247,0.55)" stroke-width="1.5"/>
+        <circle cx="462" cy="280" r="5" fill="rgba(155,89,247,0.3)" stroke="rgba(155,89,247,0.7)" stroke-width="1"/>
+        <text x="472" y="284" font-family="IBM Plex Mono,monospace" font-size="7" fill="rgba(200,160,255,0.85)">DASHBOARD · RETROFIT IoT · TABLETS</text>
+      </g>
+
+      <!-- ======== CAMERAS ======== -->
+      <g class="cam-group" id="cam1" onclick="pick('cam1','cam','active')" data-tip="CAM-01 · IA Ativa 24h" style="cursor:pointer">
+        <polygon points="405,46 435,46 420,95" fill="var(--purple)" class="cam-fov"/>
+        <rect class="cam-body" x="408" y="30" width="24" height="18" rx="4" fill="var(--surface)" stroke="var(--purple)"/>
+        <circle cx="420" cy="39" r="5" fill="none" stroke="rgba(155,89,247,0.8)" stroke-width="1.5"/>
+        <circle cx="420" cy="39" r="2" fill="rgba(155,89,247,0.9)"/>
+        <text x="406" y="58" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(155,89,247,0.65)">CAM-01</text>
+      </g>
+      <g class="cam-group" id="cam2" onclick="pick('cam2','cam','active')" data-tip="CAM-02 · IA Ativa 24h" style="cursor:pointer">
+        <polygon points="405,484 435,484 420,436" fill="var(--purple)" class="cam-fov"/>
+        <rect class="cam-body" x="408" y="484" width="24" height="18" rx="4" fill="var(--surface)" stroke="var(--purple)"/>
+        <circle cx="420" cy="493" r="5" fill="none" stroke="rgba(155,89,247,0.8)" stroke-width="1.5"/>
+        <circle cx="420" cy="493" r="2" fill="rgba(155,89,247,0.9)"/>
+        <text x="406" y="478" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(155,89,247,0.65)">CAM-02</text>
+      </g>
+      <g class="cam-group" id="cam3" onclick="pick('cam3','cam','active')" data-tip="CAM-03 · IA Ativa 24h" style="cursor:pointer">
+        <polygon points="30,264 78,250 78,278" fill="var(--purple)" class="cam-fov"/>
+        <rect class="cam-body" x="28" y="256" width="18" height="24" rx="4" fill="var(--surface)" stroke="var(--purple)"/>
+        <circle cx="37" cy="268" r="5" fill="none" stroke="rgba(155,89,247,0.8)" stroke-width="1.5"/>
+        <circle cx="37" cy="268" r="2" fill="rgba(155,89,247,0.9)"/>
+        <text x="50" y="264" font-family="IBM Plex Mono,monospace" font-size="6.5" fill="rgba(155,89,247,0.65)">CAM-03</text>
+      </g>
+
+      <!-- Grid coords -->
+      <text x="34" y="518" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,255,255,0.1)">A1</text>
+      <text x="408" y="518" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,255,255,0.1)">B1</text>
+      <text x="778" y="518" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,255,255,0.1)">C1</text>
+      <text x="34" y="44" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,255,255,0.1)">A3</text>
+      <text x="778" y="44" font-family="IBM Plex Mono,monospace" font-size="7.5" fill="rgba(255,255,255,0.1)">C3</text>
+
+      <text id="hint" x="415" y="515" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="rgba(255,255,255,0.18)">
+        ↑  Clique em qualquer setor para inspecionar o diagnóstico
+      </text>
+    </svg>
+
+    <div class="compass-wrap">
+      <div class="compass">N</div>
+      <div class="scale-wrap">
+        <div class="scale-line"></div>
+        <div class="scale-text">0 ········ 10m</div>
+      </div>
+    </div>
+
+    <!-- Summary button -->
+    <button class="sum-btn" onclick="document.getElementById('summaryOverlay').classList.add('open')">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Proposta Completa
+    </button>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="idle-screen" id="idleScreen">
+      <div class="idle-hexagon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <div class="idle-title">Aguardando Seleção</div>
+      <div class="idle-sub">Selecione um setor no mapa para visualizar o diagnóstico e as soluções da INTEC Solutions.</div>
+      <div class="idle-hint">
+        <span>6 problemas mapeados · 3 meses · R$ 195k</span>
+      </div>
+    </div>
+
+    <div class="active-panel" id="activePanel">
+      <div class="panel-top">
+        <div class="p-cat" id="pCat">—</div>
+        <div class="p-title" id="pTitle">—</div>
+        <div class="p-meta" id="pMeta">—</div>
+      </div>
+      <div class="prob-block" id="pProb">
+        <div class="prob-title" id="pProbTitle">—</div>
+        <div class="prob-desc" id="pProbDesc">—</div>
+      </div>
+      <div class="panel-scroll">
+        <div class="sec-head">Soluções Propostas</div>
+        <div id="pSols"></div>
+      </div>
+      <div class="panel-metrics" id="pMetrics"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY OVERLAY -->
+<div class="summary-overlay" id="summaryOverlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="summary-box">
+    <div class="sum-header">
+      <div>
+        <div class="sum-title">Proposta Técnica Completa</div>
+        <div class="sum-sub">INTEC Solutions → Metalúrgica YZ · Jaraguá do Sul / SC · 90 dias · R$ 195.000</div>
+      </div>
+      <button class="sum-close" onclick="document.getElementById('summaryOverlay').classList.remove('open')">✕ Fechar</button>
+    </div>
+    <div class="sum-grid">
+      <div class="sum-card" style="background:rgba(255,59,59,0.07);border-color:var(--red)">
+        <div class="sum-card-num">PROBLEMA 01</div>
+        <div class="sum-card-title">Segurança e Acidentes</div>
+        <div class="sum-card-sols">✓ Reestruturação da CIPA<br>✓ Adequação física NR-12/6<br>✓ Visão Computacional 24h</div>
+      </div>
+      <div class="sum-card" style="background:rgba(255,140,0,0.07);border-color:var(--orange)">
+        <div class="sum-card-num">PROBLEMA 02</div>
+        <div class="sum-card-title">Máquinas Obsoletas</div>
+        <div class="sum-card-sols">✓ Travas eletrônicas intertravadas<br>✓ Renovação sistema de exaustão<br>✓ Sistema MES integrado</div>
+      </div>
+      <div class="sum-card" style="background:rgba(255,140,0,0.07);border-color:var(--orange)">
+        <div class="sum-card-num">PROBLEMA 03</div>
+        <div class="sum-card-title">Prevenção de Incêndios</div>
+        <div class="sum-card-sols">✓ Sensores de temperatura nos fornos<br>✓ Organização de inflamáveis NR-23<br>✓ Treinamento com Bombeiros Voluntários</div>
+      </div>
+      <div class="sum-card" style="background:rgba(0,230,118,0.06);border-color:var(--green)">
+        <div class="sum-card-num">PROBLEMA 04</div>
+        <div class="sum-card-title">Gestão Ambiental</div>
+        <div class="sum-card-sols">✓ Smart Metering IoT por setor<br>✓ QR Code para resíduos Classe I<br>✓ Conformidade PNRS / NBR 10.004</div>
+      </div>
+      <div class="sum-card" style="background:rgba(30,107,255,0.07);border-color:var(--blue)">
+        <div class="sum-card-num">PROBLEMA 05</div>
+        <div class="sum-card-title">Cultura Interna</div>
+        <div class="sum-card-sols">✓ Canal anônimo via QR Code<br>✓ Gamificação e premiação por setor<br>✓ DDS e gestão à vista (TVs)</div>
+      </div>
+      <div class="sum-card" style="background:rgba(155,89,247,0.07);border-color:var(--purple)">
+        <div class="sum-card-num">PROBLEMA 06</div>
+        <div class="sum-card-title">Novas Tecnologias</div>
+        <div class="sum-card-sols">✓ Retrofit IoT nas máquinas atuais<br>✓ Tablets substituem pranchetas<br>✓ Dashboards em nuvem para gestores</div>
+      </div>
+    </div>
+    <div class="sum-kpis">
+      <div class="sum-kpi">
+        <div class="sum-kpi-val" style="color:var(--red)">-50%</div>
+        <div class="sum-kpi-lbl">Acidentes em<br>6 meses</div>
+      </div>
+      <div class="sum-kpi">
+        <div class="sum-kpi-val" style="color:var(--blue-light)">-10%</div>
+        <div class="sum-kpi-lbl">Consumo<br>Energia/Água</div>
+      </div>
+      <div class="sum-kpi">
+        <div class="sum-kpi-val" style="color:var(--green)">100%</div>
+        <div class="sum-kpi-lbl">Rastreabilidade<br>de Resíduos</div>
+      </div>
+      <div class="sum-kpi">
+        <div class="sum-kpi-val" style="color:var(--yellow)">R$ 195k</div>
+        <div class="sum-kpi-lbl">Orçamento<br>3 Sprints · 90 dias</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {
+  acidentes: {
+    cat:'NR-12 · NR-6 · Segurança do Trabalho', catBg:'rgba(255,59,59,0.15)', catCol:'#ff6b6b',
+    title:'Alto Índice de Acidentes e Cultura de Fachada',
+    meta:'Problema 01 / 06  ·  Prioridade: MÁXIMA  ·  NR-12 / NR-6',
+    probBorder:'#ff3b3b', probBg:'rgba(255,59,59,0.07)', probTitleCol:'#ff6b6b',
+    probTitle:'⚠ Risco Crítico — Acidentes Graves em Curso',
+    probDesc:'Alta incidência de cortes e queimaduras. Máquinas com proteções desativadas. Cultura organizacional onde a produção é priorizada sobre a vida do colaborador. NR-12 e NR-6 sistematicamente descumpridas.',
+    sols:[
+      {t:'Reestruturação Emergencial da CIPA', d:'Ativação com membros engajados e mandato real. Reuniões obrigatórias (DDS) toda terça e quinta, 15 minutos, com acompanhamento mensal de indicadores de segurança.'},
+      {t:'Adequação Física NR-12 e NR-6', d:'Proteções intertravadas, bloqueios físicos e controle de EPIs nas máquinas de risco (tornos, CNC, serras). Fiscalização rigorosa e eliminação do uso "teatral" de equipamentos.'},
+      {t:'Visão Computacional (IA 24/7)', d:'Software acoplado ao CFTV existente detecta ausência de capacetes, óculos e luvas em tempo real, disparando alerta ao supervisor sem intervenção humana.'}
+    ],
+    metrics:[{l:'Prioridade',v:'MÁXIMA'},{l:'Normas',v:'NR-12 / NR-6'},{l:'Meta',v:'-50% acidentes'},{l:'Prazo',v:'6 meses'}]
+  },
+  maquinas: {
+    cat:'NR-12 · Modernização Industrial', catBg:'rgba(255,140,0,0.15)', catCol:'#ffaa44',
+    title:'Máquinas Obsoletas e Apagão de Dados',
+    meta:'Problema 02 / 06  ·  Prioridade: ALTA  ·  NR-12 / MES',
+    probBorder:'#ff8c00', probBg:'rgba(255,140,0,0.07)', probTitleCol:'#ffaa44',
+    probTitle:'⚠ Risco Operacional — Equipamentos Defasados',
+    probDesc:'Serras de fita e fornos manuais com travas burladas. Gestão por pranchetas de papel gerando "apagão de dados". Motores antigos com alto desperdício energético.',
+    sols:[
+      {t:'Travas Eletrônicas Intertravadas', d:'Substituição das travas mecânicas burladas por sensores eletrônicos codificados nas serras de fita e prensas — invioláveis sem senha de supervisor autorizado.'},
+      {t:'Renovação do Sistema de Exaustão', d:'Troca de filtros saturados e instalação de sensores de pressão digital para monitorar qualidade do ar em tempo real. Elimina exposição a fumaça tóxica.'},
+      {t:'Sistema MES Integrado', d:'Plataforma conectando máquinas, operadores e gestores. Fim das pranchetas: dados do chão de fábrica em tempo real na nuvem, acessíveis pelo celular da diretoria.'}
+    ],
+    metrics:[{l:'Tecnologia',v:'MES + IoT'},{l:'Norma',v:'NR-12'},{l:'Impacto',v:'Fim das Pranchetas'},{l:'Retorno',v:'Curto Prazo'}]
+  },
+  incendio: {
+    cat:'NR-23 · Prevenção de Incêndios', catBg:'rgba(255,140,0,0.15)', catCol:'#ffaa44',
+    title:'Prevenção e Combate a Incêndios',
+    meta:'Problema 03 / 06  ·  Prioridade: ALTA  ·  NR-23',
+    probBorder:'#ff8c00', probBg:'rgba(255,140,0,0.07)', probTitleCol:'#ffaa44',
+    probTitle:'⚠ Risco Térmico — Área Crítica dos Fornos',
+    probDesc:'Alto risco de incêndio nos fornos industriais. Inflamáveis armazenados de forma inadequada pela fábrica. Rotas de evacuação inexistentes ou bloqueadas.',
+    sols:[
+      {t:'Sensores de Temperatura nos Fornos', d:'Alarmes automáticos acionados ao detectar superaquecimento, cortando energia e acionando a brigada antes do sinistro — prevenção antes da ocorrência.'},
+      {t:'Organização e Descarte de Inflamáveis', d:'Segregação e armazenamento correto de materiais inflamáveis com descarte adequado de resíduos contaminados (estopas, óleos), conforme NR-23.'},
+      {t:'Treinamento com Bombeiros Voluntários', d:'Capacitação prática com o Corpo de Bombeiros de Jaraguá do Sul, mapeamento de rotas de fuga e manutenção periódica de extintores. Custo: R$ 0,00.'}
+    ],
+    metrics:[{l:'Norma',v:'NR-23'},{l:'Parceiro',v:'Bombeiros'},{l:'Custo Treino',v:'R$ 0,00'},{l:'Sensor',v:'Temperatura'}]
+  },
+  sustentabilidade: {
+    cat:'PNRS · NBR 10.004 · Gestão Ambiental', catBg:'rgba(0,230,118,0.12)', catCol:'#00e676',
+    title:'Gestão Ambiental e de Recursos',
+    meta:'Problema 04 / 06  ·  Risco Legal: Multa / Interdição  ·  PNRS',
+    probBorder:'#00e676', probBg:'rgba(0,230,118,0.06)', probTitleCol:'#00e676',
+    probTitle:'⚠ Infração Ambiental — PNRS e NBR 10.004',
+    probDesc:'Consumo cego de água e energia sem medição por setor. Resíduos perigosos Classe I (estopas com óleo, fluidos de corte) descartados no lixo comum — risco real de multa e interdição.',
+    sols:[
+      {t:'Smart Metering IoT por Setor', d:'Sensores individuais de água e energia em cada área da fábrica. Detecta picos e vazamentos noturnos com alerta automático via celular para a manutenção. Meta: -10%.'},
+      {t:'Rastreabilidade de Resíduos via QR Code', d:'Pontos de coleta com tablet onde o operador valida o descarte correto de resíduos Classe I. Gera relatório de conformidade PNRS automático para auditorias.'}
+    ],
+    metrics:[{l:'Regulação',v:'PNRS'},{l:'Norma',v:'NBR 10.004'},{l:'Meta Consumo',v:'-10%'},{l:'Rastrear',v:'100% resíduos'}]
+  },
+  cultura: {
+    cat:'Gestão Cultural · CIPA · DDS', catBg:'rgba(30,107,255,0.15)', catCol:'#4d8fff',
+    title:'Cultura Interna e Comunicação Bloqueada',
+    meta:'Problema 05 / 06  ·  Impacto: Comportamental  ·  Custo Parcial: R$ 0',
+    probBorder:'#1e6bff', probBg:'rgba(30,107,255,0.07)', probTitleCol:'#4d8fff',
+    probTitle:'⚠ Falha Cultural — "Cultura de Fachada"',
+    probDesc:'Regras seguidas apenas com fiscal presente. Operários com medo de reportar riscos por receio de punição. Segurança tratada como protocolo, não como valor real da empresa.',
+    sols:[
+      {t:'Canal Anônimo via QR Code', d:'QR Code fixado nas estações permite reportar riscos e irregularidades de forma segura e anônima. Elimina o medo de retaliação e expõe as "gambiarras" ocultas.'},
+      {t:'Gamificação — Premiação por Setor', d:'Bônus mensais para equipes com zero acidentes e descarte 100% correto. Ex: jantar especial ou folga. Cria competição saudável e engajamento real com segurança.'},
+      {t:'Treinamentos Práticos na Máquina', d:'Eliminação de longas palestras teóricas. Treinamentos visuais e rápidos direto no posto de trabalho, mostrando o risco real sem tirar o operador da produção.'},
+      {t:'Gestão à Vista — TVs no Chão de Fábrica', d:'Painéis digitais exibindo alertas de segurança, metas e desempenho das equipes em tempo real. Torna a segurança visível e parte da rotina diária.'}
+    ],
+    metrics:[{l:'DDS',v:'2x / semana'},{l:'Canal',v:'Anônimo QR'},{l:'Incentivo',v:'Gamificação'},{l:'Custo Extra',v:'R$ 0,00'}]
+  },
+  tecnologia: {
+    cat:'Indústria 4.0 · Digitalização', catBg:'rgba(155,89,247,0.15)', catCol:'#b87fff',
+    title:'Obsolescência Digital e Falta de Tecnologia',
+    meta:'Problema 06 / 06  ·  Tecnologia: IoT / MES / Dashboard',
+    probBorder:'#9b59f7', probBg:'rgba(155,89,247,0.07)', probTitleCol:'#b87fff',
+    probTitle:'⚠ Gestão Às Cegas — Fábrica Isolada',
+    probDesc:'Controles em pranchetas de papel. Máquinas isoladas sem integração. Diretoria sem visibilidade do chão de fábrica. Erros humanos e lentidão comprometem a competitividade.',
+    sols:[
+      {t:'Retrofit com Sensores IoT', d:'Atualização das máquinas existentes com sensores de baixo custo (temperatura, vibração, consumo) — sem necessidade de comprar novos equipamentos. Fábrica conectada.'},
+      {t:'Fim das Pranchetas — Tablets na Produção', d:'Substituição das anotações físicas por tablets em cada estação produtiva, eliminando erros manuais e acelerando a coleta de dados em tempo real.'},
+      {t:'Dashboards em Nuvem para Gestores', d:'Painéis acessíveis pelo celular ou computador de qualquer lugar. Produção, falhas, KPIs e alertas visíveis para a diretoria 24 horas por dia.'}
+    ],
+    metrics:[{l:'Retrofit',v:'IoT Low Cost'},{l:'Interface',v:'Dashboard'},{l:'Acesso',v:'Mobile / Web'},{l:'Integração',v:'MES + CFTV'}]
+  },
+  cam: {
+    cat:'Visão Computacional · IA Industrial', catBg:'rgba(155,89,247,0.15)', catCol:'#b87fff',
+    title:'Monitoramento por Inteligência Artificial',
+    meta:'Suporte Tecnológico  ·  3 câmeras ativas  ·  24h / 7 dias',
+    probBorder:'#9b59f7', probBg:'rgba(155,89,247,0.07)', probTitleCol:'#b87fff',
+    probTitle:'🤖 IA Ativa — Auditoria Autônoma 24/7',
+    probDesc:'Software de visão computacional acoplado ao CFTV já existente na fábrica. Detecta violações de segurança automaticamente, sem depender da atenção humana.',
+    sols:[
+      {t:'Detecção de EPIs em Tempo Real', d:'IA identifica ausência de capacetes, óculos e luvas em menos de 500ms, emitindo alerta sonoro local e notificação automática ao supervisor via celular.'},
+      {t:'Controle de Zonas Restritas', d:'Câmeras mapeiam as áreas de exclusão (prensas, fornos) e alertam ao detectar presença não autorizada ou postura de risco próxima às máquinas.'},
+      {t:'Integração com CFTV Existente', d:'Solução de software acoplada às câmeras já instaladas — sem nova infraestrutura física. Reduz custo de implantação e acelera o tempo de ativação.'}
+    ],
+    metrics:[{l:'Câmeras',v:'3 pontos'},{l:'Latência',v:'< 500ms'},{l:'Operação',v:'24h / 7 dias'},{l:'Base',v:'CFTV Atual'}]
+  }
+};
+
+function pick(zoneId, dataKey, cls) {
+  document.querySelectorAll('.zone-group,.cam-group').forEach(el=>{
+    el.classList.remove('sel-red','sel-orange','sel-green','sel-blue','sel-purple','active');
+  });
+  const el = document.getElementById(zoneId);
+  if(el) el.classList.add(cls);
+  const hint = document.getElementById('hint');
+  if(hint) hint.style.opacity = '0';
+
+  const d = DATA[dataKey]; if(!d) return;
+
+  document.getElementById('idleScreen').style.display = 'none';
+  const ap = document.getElementById('activePanel');
+  ap.classList.remove('show');
+  void ap.offsetWidth;
+  ap.classList.add('show');
+
+  const cat = document.getElementById('pCat');
+  cat.textContent = d.cat; cat.style.background = d.catBg; cat.style.color = d.catCol;
+
+  document.getElementById('pTitle').textContent = d.title;
+  document.getElementById('pMeta').textContent = d.meta;
+
+  const pb = document.getElementById('pProb');
+  pb.style.borderColor = d.probBorder; pb.style.background = d.probBg;
+  const pt = document.getElementById('pProbTitle');
+  pt.textContent = d.probTitle; pt.style.color = d.probTitleCol;
+  document.getElementById('pProbDesc').textContent = d.probDesc;
+
+  const sc = document.getElementById('pSols');
+  sc.innerHTML = '';
+  d.sols.forEach((s,i)=>{
+    const div = document.createElement('div');
+    div.className = 'sol-item';
+    div.innerHTML = `<div class="sol-num" style="background:${d.catBg};color:${d.catCol}">${String(i+1).padStart(2,'0')}</div><div><div class="sol-title">${s.t}</div><div class="sol-desc">${s.d}</div></div>`;
+    sc.appendChild(div);
+  });
+
+  const mc = document.getElementById('pMetrics');
+  mc.innerHTML = '';
+  d.metrics.forEach(m=>{
+    const div = document.createElement('div');
+    div.className = 'm-box';
+    div.innerHTML = `<div class="m-label">${m.l}</div><div class="m-val" style="color:${d.catCol}">${m.v}</div>`;
+    mc.appendChild(div);
+  });
+}
+
+// KPI bar animation
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    [['kf1',50],['kf2',10],['kf3',100],['kf4',85],['kf5',65]].forEach(([id,w])=>{
+      const el = document.getElementById(id);
+      if(el) el.style.width = w+'%';
+    });
+  }, 500);
+});
+
+// Tooltip
+const tt = document.getElementById('tooltip');
+document.querySelectorAll('.zone-group,.cam-group').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    const tip = el.getAttribute('data-tip'); if(!tip) return;
+    tt.textContent = tip; tt.style.opacity='1';
+    tt.style.left=(e.clientX+14)+'px'; tt.style.top=(e.clientY-10)+'px';
+  });
+  el.addEventListener('mouseleave',()=>{ tt.style.opacity='0'; });
+});
+</script>
+</body>
+</html>
+HTMLEOF
+echo "done"
