@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Centro de Controle Estratégico | Metalúrgica YZ</title>
+    <title>Planta Detalhada | Metalúrgica YZ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -44,42 +44,10 @@
             margin-bottom: 20px;
             border-bottom: 2px solid var(--border-light);
             padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
-        .header-text h1 { font-size: 1.6rem; color: var(--primary-blue); }
-        .header-text p { color: #64748b; font-size: 0.9rem; }
-
-        /* --- BOTÕES DE MODALIDADE (FILTROS) --- */
-        .view-switcher {
-            display: flex;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 8px;
-            gap: 4px;
-        }
-
-        .switch-btn {
-            background: transparent;
-            border: none;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .switch-btn.active {
-            background: #fff;
-            color: var(--primary-blue);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+        .header h1 { font-size: 1.6rem; color: var(--primary-blue); }
+        .header p { color: #64748b; font-size: 0.9rem; }
 
         .container {
             display: grid;
@@ -108,14 +76,13 @@
         
         .map-header h2 { color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;}
         
-        .legend { display: flex; gap: 15px; font-size: 0.75rem; color: #cbd5e1; flex-wrap: wrap; }
+        .legend { display: flex; gap: 15px; font-size: 0.75rem; color: #cbd5e1; }
         .legend span { display: flex; align-items: center; gap: 5px; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
         .dot.red { background: var(--alert-red); }
         .dot.orange { background: var(--warn-orange); }
         .dot.purple { background: var(--tech-purple); }
         .dot.green { background: var(--safe-green); }
-        .dot.blue { background: var(--accent-blue); }
 
         .blueprint {
             position: relative;
@@ -131,10 +98,358 @@
             overflow: hidden;
         }
 
-        /* Elementos da Fábrica */
+        /* Elementos da Fábrica (Corredores, Paredes) */
         .corridor {
             position: absolute;
-            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(234, 179, 8, 0.05) 10px, rgba(234, 179, 8, 0.05) 20px);
-            border: 1px dashed rgba(234, 179, 8, 0.2);
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(234, 179, 8, 0.1) 10px, rgba(234, 179, 8, 0.1) 20px);
+            border: 1px dashed rgba(234, 179, 8, 0.4);
         }
         .main-aisle { top: 40%; left: 0; width: 100%; height: 60px; }
+        .sub-aisle { top: 0; left: 50%; width: 40px; height: 100%; transform: translateX(-50%); }
+
+        /* Zonas Específicas */
+        .zone {
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            padding: 5px;
+        }
+        
+        .zone:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.5); transform: translateY(-2px); z-index: 10;}
+        .zone.active { box-shadow: 0 0 20px inset; border-style: solid; z-index: 10; }
+
+        .zone svg { width: 24px; height: 24px; margin-bottom: 5px; fill: rgba(255,255,255,0.7); transition: fill 0.2s;}
+        .zone:hover svg, .zone.active svg { fill: #fff; }
+        
+        .zone-title { color: #f8fafc; font-size: 0.85rem; font-weight: 600; pointer-events: none;}
+        .zone-badge { position: absolute; top: -10px; right: -10px; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+
+        /* Cores Ativas por Tipo */
+        .active-red { border-color: var(--alert-red) !important; background: rgba(239, 68, 68, 0.15) !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3) inset !important; }
+        .active-orange { border-color: var(--warn-orange) !important; background: rgba(245, 158, 11, 0.15) !important; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3) inset !important; }
+        .active-green { border-color: var(--safe-green) !important; background: rgba(16, 185, 129, 0.15) !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) inset !important; }
+
+        /* Posições das Zonas */
+        #z-usinagem { top: 5%; left: 5%; width: 40%; height: 30%; }
+        #z-prensas { top: 55%; left: 5%; width: 40%; height: 35%; }
+        #z-fornos { top: 5%; right: 5%; width: 40%; height: 30%; }
+        #z-solda { top: 55%; right: 5%; width: 40%; height: 35%; }
+        #z-dds { top: 41%; left: 40%; width: 20%; height: 56px; border-radius: 20px; background: rgba(16, 185, 129, 0.1); border-color: var(--safe-green); z-index: 5;}
+
+        /* Câmeras */
+        .camera {
+            position: absolute;
+            width: 32px; height: 32px;
+            background: var(--bg-dark);
+            border: 2px solid var(--tech-purple);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 20;
+            transition: all 0.3s;
+        }
+        .camera::after {
+            content: ''; position: absolute;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            transform-origin: top center;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .camera:hover, .camera.active { background: var(--tech-purple); transform: scale(1.1); }
+        .camera:hover::after, .camera.active::after { opacity: 1; }
+        .camera svg { width: 16px; height: 16px; fill: var(--tech-purple); }
+        .camera:hover svg, .camera.active svg { fill: #fff; }
+
+        #cam-1 { top: 15%; left: 48%; transform: rotate(-90deg); }
+        #cam-1::after { transform: rotate(90deg) translate(-50%, 10px); }
+        #cam-2 { bottom: 15%; right: 48%; transform: rotate(90deg); }
+        #cam-2::after { transform: rotate(-90deg) translate(-50%, -150px); }
+
+        /* --- PAINEL LATERAL --- */
+        .info-panel {
+            background: #fff; border-radius: 12px; padding: 25px;
+            border: 1px solid var(--border-light);
+            display: flex; flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .idle-state { margin: auto; text-align: center; color: #94a3b8; font-size: 0.95rem; }
+        
+        .content-state { display: none; flex-direction: column; height: 100%; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .tag { align-self: flex-start; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; }
+        .panel-title { color: var(--primary-blue); font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+        
+        .alert-box { background: #fef2f2; border-left: 4px solid var(--alert-red); padding: 12px; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
+        .alert-box strong { color: #991b1b; display: block; font-size: 0.85rem; margin-bottom: 4px; text-transform: uppercase;}
+        .alert-box p { color: #7f1d1d; font-size: 0.9rem; margin: 0;}
+
+        .data-list { list-style: none; margin-bottom: 20px; flex-grow: 1;}
+        .data-list li { position: relative; padding-left: 20px; margin-bottom: 12px; font-size: 0.95rem; color: #334155; line-height: 1.5; }
+        .data-list li::before { content: "✓"; position: absolute; left: 0; color: var(--accent-blue); font-weight: bold; }
+
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+        .metric-card { background: #f8fafc; border: 1px solid var(--border-light); padding: 12px; border-radius: 8px; }
+        .metric-card span { display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;}
+        .metric-card strong { font-size: 1.1rem; color: var(--primary-blue); }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .blueprint { height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Centro de Controle Estratégico YZ</h1>
+        <p>Mapeamento de Riscos e Implementação de Soluções Inteligentes (CIPA + IA + NR)</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- MAPA -->
+        <div class="map-wrapper">
+            <div class="map-header">
+                <h2>Planta Baixa Interativa</h2>
+                <div class="legend">
+                    <span><div class="dot red"></div> Risco Crítico</span>
+                    <span><div class="dot orange"></div> Risco Térmico/Químico</span>
+                    <span><div class="dot purple"></div> Monitoramento IA</span>
+                    <span><div class="dot green"></div> Ponto de Cultura</span>
+                </div>
+            </div>
+            
+            <div class="blueprint">
+                <!-- Corredores -->
+                <div class="corridor main-aisle"></div>
+                <div class="corridor sub-aisle"></div>
+
+                <!-- ZONA: Usinagem -->
+                <div class="zone" id="z-usinagem" onclick="loadData('usinagem', this, 'active-red')">
+                    <div class="zone-badge" style="background: var(--alert-red);">NR-12</div>
+                    <!-- Icone Engrenagem -->
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    <div class="zone-title">Tornos e CNC</div>
+                </div>
+
+                <!-- ZONA: Prensas -->
+                <div class="zone" id="z-prensas" onclick="loadData('prensas', this, 'active-red')">
+                    <div class="zone-badge" style="background: var(--alert-red);">NR-12</div>
+                    <!-- Icone Prensa/Corte -->
+                    <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                    <div class="zone-title">Prensas, Corte e Dobra</div>
+                </div>
+
+                <!-- ZONA: Fornos -->
+                <div class="zone" id="z-fornos" onclick="loadData('fornos', this, 'active-orange')">
+                    <div class="zone-badge" style="background: var(--warn-orange);">NR-23</div>
+                    <!-- Icone Fogo -->
+                    <svg viewBox="0 0 24 24"><path d="M19.48,13.03A4,4,0,0,1,16,19h-4a2,2,0,0,1-2-2v-1h2V14H8v2H6V14H4v2a4,4,0,0,0,4,4h4a4,4,0,0,0,4-4V11.2C15.35,11.83,14.28,12,13,12c-2.76,0-5-2.24-5-5s2.24-5,5-5c1.28,0,2.35,0.17,3,0.8v2.24A4,4,0,0,1,19.48,13.03z M13,4c-1.65,0-3,1.35-3,3s1.35,3,3,3s3-1.35,3-3S14.65,4,13,4z"/></svg>
+                    <div class="zone-title">Fornos e Tratamento Térmico</div>
+                </div>
+
+                <!-- ZONA: Soldagem -->
+                <div class="zone" id="z-solda" onclick="loadData('solda', this, 'active-orange')">
+                    <div class="zone-badge" style="background: var(--warn-orange);">NR-23</div>
+                    <!-- Icone Mascara de solda (shield) -->
+                    <svg viewBox="0 0 24 24"><path d="M12,1L3,5v6c0,5.55,3.84,10.74,9,12c5.16-1.26,9-6.45,9-12V5L12,1z M12,11.99h7c-0.53,4.12-3.28,7.79-7,8.94V12H5V6.3l7-3.11V11.99z"/></svg>
+                    <div class="zone-title">Cabines de Soldagem</div>
+                </div>
+
+                <!-- ZONA: DDS / Cultura -->
+                <div class="zone" id="z-dds" onclick="loadData('dds', this, 'active-green')">
+                    <svg viewBox="0 0 24 24" style="width: 18px; margin-bottom: 0;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    <div class="zone-title" style="color: var(--safe-green);">Ponto DDS (CIPA)</div>
+                </div>
+
+                <!-- CAMERAS IA -->
+                <div class="camera" id="cam-1" onclick="loadData('cam', this, 'active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </div>
+                <div class="camera" id="cam-2" onclick="loadData('cam', this, 'active')">
+                    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PAINEL -->
+        <div class="info-panel">
+            <div class="idle-state" id="idle-msg">
+                Selecione uma área (Máquinas, Fornos, Câmeras ou Ponto DDS) no mapa para inspecionar os detalhes da solução.
+            </div>
+
+            <div class="content-state" id="data-view">
+                <span class="tag" id="p-tag">Categoria</span>
+                <h2 class="panel-title" id="p-title">Título</h2>
+                
+                <div class="alert-box" id="p-alert-box">
+                    <strong id="p-alert-title">Foco de Atenção</strong>
+                    <p id="p-alert-desc">Descrição do problema grave.</p>
+                </div>
+
+                <ul class="data-list" id="p-list"></ul>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span id="p-metric1-label">Label 1</span>
+                        <strong id="p-metric1-val">Valor 1</strong>
+                    </div>
+                    <div class="metric-card">
+                        <span id="p-metric2-label">Label 2</span>
+                        <strong id="p-metric2-val">Valor 2</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const db = {
+            'usinagem': {
+                tag: 'Adequação NR-12', tagBg: '#fef2f2', tagCol: '#991b1b',
+                title: 'Setor 1: Tornos e CNC',
+                alertTitle: 'Risco Mecânico Constante',
+                alertDesc: 'Histórico de acidentes por falta de barreiras físicas e uso incorreto de EPIs.',
+                alertBorder: '#ef4444', alertBg: '#fef2f2',
+                points: [
+                    'Implementação de proteções fixas e móveis intertravadas.',
+                    'Erradicação do uso teatral de EPIs.',
+                    'Fiscalização rígida da CIPA no setor.'
+                ],
+                m1l: 'Cronograma DDS', m1v: 'Terças, 15 min',
+                m2l: 'Prioridade', m2v: 'Alta (Imediata)'
+            },
+            'prensas': {
+                tag: 'Adequação NR-12 Crítica', tagBg: '#fef2f2', tagCol: '#991b1b',
+                title: 'Setor 2: Prensas, Corte e Dobra',
+                alertTitle: 'Risco de Amputação e Esmagamento',
+                alertDesc: 'Zona vermelha da fábrica. Necessita de intervenção física e cultural urgente.',
+                alertBorder: '#ef4444', alertBg: '#fef2f2',
+                points: [
+                    'Instalação de cortinas de luz e comandos bi-manuais.',
+                    'Bloqueio de religamento automático (Painel Elétrico seguro).',
+                    'Acompanhamento comportamental focado em atenção plena.'
+                ],
+                m1l: 'Cronograma DDS', m1v: 'Terças, 15 min',
+                m2l: 'Prioridade', m2v: 'Máxima'
+            },
+            'fornos': {
+                tag: 'Controle NR-23', tagBg: '#fff7ed', tagCol: '#9a3412',
+                title: 'Setor 4: Fornos e Tratamento',
+                alertTitle: 'Risco Térmico e Incêndio',
+                alertDesc: 'Exposição a altas temperaturas e risco severo de princípios de incêndio.',
+                alertBorder: '#f59e0b', alertBg: '#fff7ed',
+                points: [
+                    'Treinamentos práticos de contenção e combate a incêndios.',
+                    'Adequação de saídas de emergência e rotas de fuga.',
+                    'Integração da Brigada com a CIPA.'
+                ],
+                m1l: 'Parceria Treinamento', m1v: 'Bombeiros Voluntários',
+                m2l: 'Custo Capacitação', m2v: 'R$ 0,00'
+            },
+            'solda': {
+                tag: 'Controle NR-23 e Epi', tagBg: '#fff7ed', tagCol: '#9a3412',
+                title: 'Setor 3: Cabines de Soldagem',
+                alertTitle: 'Exposição a Fumos Metálicos',
+                alertDesc: 'Riscos respiratórios e oftalmológicos devido à inalação e radiação UV.',
+                alertBorder: '#f59e0b', alertBg: '#fff7ed',
+                points: [
+                    'Obrigatoriedade e fiscalização de máscaras de solda automáticas e respiradores.',
+                    'Sistema de exaustão localizada otimizado.',
+                    'Conscientização sobre doenças ocupacionais a longo prazo.'
+                ],
+                m1l: 'Cronograma DDS', m1v: 'Quintas, 15 min',
+                m2l: 'Foco Cultural', m2v: 'Prevenção Respiratória'
+            },
+            'dds': {
+                tag: 'Gestão Cultural', tagBg: '#f0fdf4', tagCol: '#166534',
+                title: 'Ponto de Encontro: CIPA / DDS',
+                alertTitle: 'Núcleo de Transformação',
+                alertDesc: 'Local destinado às reuniões semanais de segurança (Diálogo Diário de Segurança).',
+                alertBorder: '#10b981', alertBg: '#f0fdf4',
+                points: [
+                    'Setores 1 e 2: Encontros obrigatórios todas as terças-feiras.',
+                    'Setores 3 e 4: Encontros obrigatórios todas as quintas-feiras.',
+                    'Palestras ministradas voluntariamente pelos Bombeiros de Jaraguá do Sul.'
+                ],
+                m1l: 'Impacto Financeiro', m1v: 'Custo Zero',
+                m2l: 'Objetivo Principal', m2v: 'Mudança Comportamental'
+            },
+            'cam': {
+                tag: 'Indústria 4.0 / IA', tagBg: '#f5f3ff', tagCol: '#5b21b6',
+                title: 'Visão Computacional Integrada',
+                alertTitle: 'Auditoria Autônoma 24/7',
+                alertDesc: 'Inteligência Artificial acoplada às câmeras atua como fiscal ininterrupto das NRs.',
+                alertBorder: '#8b5cf6', alertBg: '#f5f3ff',
+                points: [
+                    'Detecta instantaneamente a ausência de óculos, luvas e capacetes.',
+                    'Mapeia "barreiras invisíveis" próximo às prensas e fornos.',
+                    'Dispara alertas automáticos para a supervisão em caso de violação.'
+                ],
+                m1l: 'Integração', m1v: 'Sistema CFTV Atual',
+                m2l: 'Função', m2v: 'Dupla Camada de Proteção'
+            }
+        };
+
+        function loadData(id, element, activeClass) {
+            // Remove classes ativas
+            document.querySelectorAll('.zone, .camera').forEach(el => {
+                el.classList.remove('active-red', 'active-orange', 'active-green', 'active');
+            });
+            // Adiciona classe ao clicado
+            element.classList.add(activeClass);
+
+            const data = db[id];
+            
+            document.getElementById('idle-msg').style.display = 'none';
+            const view = document.getElementById('data-view');
+            view.style.display = 'none';
+            void view.offsetWidth; // trigger reflow
+            view.style.display = 'flex';
+
+            // Tag
+            const tag = document.getElementById('p-tag');
+            tag.innerText = data.tag; tag.style.background = data.tagBg; tag.style.color = data.tagCol;
+            
+            // Textos principais
+            document.getElementById('p-title').innerText = data.title;
+            
+            // Alert box
+            const alertBox = document.getElementById('p-alert-box');
+            alertBox.style.borderColor = data.alertBorder;
+            alertBox.style.backgroundColor = data.alertBg;
+            const alertTitle = document.getElementById('p-alert-title');
+            alertTitle.innerText = data.alertTitle;
+            alertTitle.style.color = data.alertBorder;
+            document.getElementById('p-alert-desc').innerText = data.alertDesc;
+
+            // Lista
+            const list = document.getElementById('p-list');
+            list.innerHTML = '';
+            data.points.forEach(pt => {
+                const li = document.createElement('li');
+                li.innerText = pt;
+                list.appendChild(li);
+            });
+
+            // Metricas
+            document.getElementById('p-metric1-label').innerText = data.m1l;
+            document.getElementById('p-metric1-val').innerText = data.m1v;
+            document.getElementById('p-metric2-label').innerText = data.m2l;
+            document.getElementById('p-metric2-val').innerText = data.m2v;
+        }
+    </script>
+</body>
+</html>
